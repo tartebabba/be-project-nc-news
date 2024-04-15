@@ -110,10 +110,14 @@ describe('Articles', () => {
         expect(typeof article.article_img_url).toBe('string');
       });
   });
+  test('Get 404: Endpoint returns an error when an article_id is not available', () => {
+    return request(app)
+      .get('/api/articles/999999')
+      .expect(404)
+      .then(({ body }) => {
+        const { errorMessage } = body;
+        const recordNotFound = 'Sorry! That particular record was not found';
+        expect(errorMessage).toBe(recordNotFound);
+      });
+  });
 });
-
-// [x] Update fetch-topics to send back with meaningful key.
-// [x] Assert the types for each of the keys for fetch-topics.
-// [x] Update the error message to use toMatchObjects().
-// [x] Remove all console.logs.
-// [x] Update endpoints test to only require the file and not go through fs
