@@ -1,6 +1,5 @@
 const db = require('../db/connection');
 const fs = require('fs').promises;
-const test = require('../endpoints.json');
 
 exports.fetchEndpointsDescription = () => {
   return fs
