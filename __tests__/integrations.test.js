@@ -3,8 +3,8 @@ const app = require('../app');
 const db = require('../db/connection');
 const seed = require('../db/seeds/seed');
 const data = require('../db/data/test-data/index');
-const fs = require('fs').promises;
 const endpoints = require('../endpoints.json');
+
 
 // require('jest-sorted') ← not required for now.
 
@@ -111,3 +111,9 @@ describe('Articles', () => {
       });
   });
 });
+
+// [x] Update fetch-topics to send back with meaningful key.
+// [x] Assert the types for each of the keys for fetch-topics.
+// [x] Update the error message to use toMatchObjects().
+// [x] Remove all console.logs.
+// [x] Update endpoints test to only require the file and not go through fs
