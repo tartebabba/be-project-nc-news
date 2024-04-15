@@ -110,4 +110,14 @@ describe('Articles', () => {
         expect(typeof article.article_img_url).toBe('string');
       });
   });
+  test('Get 404: Endpoint returns an error when an article_id is not available', () => {
+    return request(app)
+      .get('/api/articles/999999')
+      .expect(404)
+      .then(({ body }) => {
+        const { errorMessage } = body;
+        const recordNotFound = 'Sorry! That particular record was not found';
+        expect(errorMessage).toBe(recordNotFound);
+      });
+  });
 });
