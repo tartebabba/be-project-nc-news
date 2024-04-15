@@ -14,7 +14,7 @@ exports.getEndpointsDescription = (req, res, next) => {
 exports.getTopics = (req, res, next) => {
   return fetchAllTopics()
     .then((topics) => {
-      res.status(200).send(topics);
+      res.status(200).send({ topics });
     })
     .catch((err) => next(err));
 };

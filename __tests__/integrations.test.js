@@ -4,6 +4,7 @@ const db = require('../db/connection');
 const seed = require('../db/seeds/seed');
 const data = require('../db/data/test-data/index');
 const fs = require('fs').promises;
+const endpoints = require('../endpoints.json');
 
 // require('jest-sorted') ← not required for now.
 
@@ -22,10 +23,11 @@ describe('404: Incorrect URL', () => {
       .get('/api/invalid_url')
       .expect(404)
       .then(({ body }) => {
-        const expectedErrorMessage = `Oops.. We can't find that page for you`;
-        const expectedErrorParagraph = `We've searched high and low, but couldn't find the page you're looking for. How about we start from home again?`;
-        expect(body.errorMessage).toBe(expectedErrorMessage);
-        expect(body.errorParagraph).toBe(expectedErrorParagraph);
+        const expectedResponse = {
+          errorMessage: `Oops.. We can't find that page for you`,
+          errorParagraph: `We've searched high and low, but couldn't find the page you're looking for. How about we start from home again?`,
+        };
+        expect(body).toMatchObject(expectedResponse);
       });
   });
 });
@@ -38,10 +40,8 @@ describe('ENDPOINTS', () => {
       .get('/api')
       .expect(200)
       .then(({ body }) => {
-        fs.readFile(`${__dirname}/../endpoints.json`, 'utf-8').then((data) => {
-          expect(body).not.toBeUndefined();
-          expect(body).toEqual(JSON.parse(data));
-        });
+        expect(body).not.toBeUndefined();
+        expect(body).toEqual(endpoints);
       });
   });
 });
@@ -53,9 +53,13 @@ describe('Topics', () => {
       .get('/api/topics')
       .expect(200)
       .then(({ body }) => {
+        const { topics } = body;
         const expectedKeys = ['slug', 'description'];
-        body.forEach((topic) => {
+        topics.forEach((topic) => {
           expect(Object.keys(topic)).toEqual(expectedKeys);
+          expect(Object.keys(topic).length).toBe(2);
+          expect(typeof topic.slug).toBe('string');
+          expect(typeof topic.description).toBe('string');
         });
       });
   });
@@ -63,13 +67,13 @@ describe('Topics', () => {
 });
 
 // ARTICLES
-describe.only('Articles', () => {
+describe('Articles', () => {
   test('GET 200: Endpoint returns an a singular article by ID, with the appropriate properties.', () => {
     return request(app)
       .get('/api/articles/1')
       .expect(200)
       .then(({ body }) => {
-        const { article } = body
+        const { article } = body;
         const expectedArticle = {
           article_id: 1,
           title: 'Living in the shadow of a great man',
@@ -78,29 +82,32 @@ describe.only('Articles', () => {
           body: 'I find this existence challenging',
           created_at: '2020-07-09T20:11:00.000Z',
           votes: 100,
-          article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
-        }
-        const expectedKeys = ["article_id", "title", "topic", "author", "body", "created_at", "votes", "article_img_url"];
+          article_img_url:
+            'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+        };
+        const expectedKeys = [
+          'article_id',
+          'title',
+          'topic',
+          'author',
+          'body',
+          'created_at',
+          'votes',
+          'article_img_url',
+        ];
         expectedKeys.forEach((key) => {
-          expect(key in article).toBe(true)
-        })
-        expect(Object.keys(article).length).toBe(8)
+          expect(key in article).toBe(true);
+        });
+        expect(Object.keys(article).length).toBe(8);
         expect(article).toMatchObject(expectedArticle);
-        expect(typeof article.article_id).toBe("number");
-        expect(typeof article.title).toBe("string");
-        expect(typeof article.topic).toBe("string");
-        expect(typeof article.author).toBe("string");
-        expect(typeof article.body).toBe("string");
-        expect(typeof article.created_at).toBe("string")
-        expect(typeof article.votes).toBe("number");
-        expect(typeof article.article_img_url).toBe("string");
+        expect(typeof article.article_id).toBe('number');
+        expect(typeof article.title).toBe('string');
+        expect(typeof article.topic).toBe('string');
+        expect(typeof article.author).toBe('string');
+        expect(typeof article.body).toBe('string');
+        expect(typeof article.created_at).toBe('string');
+        expect(typeof article.votes).toBe('number');
+        expect(typeof article.article_img_url).toBe('string');
       });
   });
-  test.todo('Test for no topics found..?');
 });
-
-// [] Update fetch-topics to send back with meaningful key.
-// [] Assert the types for each of the keys for fetch-topics.
-// [] Update the error message to use toMatchObjects().
-// [] Remove all console.logs.
-// [] Update endpoints test to only require the file and not go through fs
