@@ -111,9 +111,3 @@ describe('Articles', () => {
       });
   });
 });
-
-// [x] Update fetch-topics to send back with meaningful key.
-// [x] Assert the types for each of the keys for fetch-topics.
-// [x] Update the error message to use toMatchObjects().
-// [x] Remove all console.logs.
-// [x] Update endpoints test to only require the file and not go through fs
