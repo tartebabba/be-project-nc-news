@@ -68,6 +68,41 @@ describe('Topics', () => {
 
 // ARTICLES
 describe('Articles', () => {
+  test('GET 200: Endpoint returns all articles', () => {
+    return request(app)
+      .get('/api/articles')
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        const expectedKeys = [
+          'article_id',
+          'title',
+          'topic',
+          'author',
+          'body',
+          'created_at',
+          'votes',
+          'article_img_url',
+          'comment_count',
+        ];
+        const expectedArticle = {
+          article_id: expect.any(Number),
+          title: expect.any(String),
+          topic: expect.any(String),
+          author: expect.any(String),
+          body: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: expect.any(String),
+          comment_count: expect.any(String),
+        };
+        expect(articles.length).toBe(13);
+        articles.forEach((articles) => {
+          expect(Object.keys(articles)).toEqual(expectedKeys);
+          expect(articles).toMatchObject(expectedArticle);
+        });
+      });
+  });
   test('GET 200: Endpoint returns an a singular article by ID, with the appropriate properties.', () => {
     return request(app)
       .get('/api/articles/1')
