@@ -28,10 +28,12 @@
     "jest": "^27.5.1",
     "jest-extended": "^2.0.0",
     "pg-format": "^1.0.4",
-    "prettier": "^3.2.5"
+    "prettier": "^3.2.5",
+    "supertest": "^6.3.4"
   },
   "dependencies": {
     "dotenv": "^16.0.0",
+    "express": "^4.19.2",
     "pg": "^8.7.3"
   },
   "jest": {
