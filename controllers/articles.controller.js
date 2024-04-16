@@ -5,6 +5,7 @@ const {
   checkArticleExists,
   checkUserExists,
   addNewComment,
+  updateArticle,
 } = require('../models/articles.models');
 
 exports.getArticles = (req, res, next) => {
@@ -42,6 +43,19 @@ exports.postArticleComment = (req, res, next) => {
   return addNewComment(article_id, body)
     .then((comment) => {
       res.status(201).send({ comment });
+    })
+    .catch((err) => next(err));
+};
+
+exports.patchArticleByID = (req, res, next) => {
+  const { article_id } = req.params;
+  const { body } = req;
+  return Promise.all([
+    updateArticle(article_id, body),
+    checkArticleExists(article_id),
+  ])
+    .then(([updatedArticle]) => {
+      res.status(200).send({ updatedArticle });
     })
     .catch((err) => next(err));
 };

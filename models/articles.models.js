@@ -55,3 +55,16 @@ exports.addNewComment = (articleID, { username, body }) => {
     .then(({ rows }) => rows[0]);
 };
 
+exports.updateArticle = (articleID, { inc_votes: votes }) => {
+  const keyToUpdate = 'votes';
+  const newValue = votes;
+
+  const updateArticleQuery = `UPDATE articles
+  set ${keyToUpdate} = ${keyToUpdate} + $1
+  WHERE article_id = $2
+  RETURNING *;`;
+  return db
+    .query(updateArticleQuery, [newValue, articleID])
+    .then(({ rows }) => rows[0]);
+};
+
