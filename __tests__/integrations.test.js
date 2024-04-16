@@ -31,7 +31,9 @@ describe('404: Incorrect URL', () => {
 });
 
 // ERROR MESSAGES
-const badRequest = "Bad request" // Ensure to align with error.js messages
+// ! Ensure to align with error.js messages
+const badRequest = "Bad request" 
+const recordNotFound = "Sorry! We weren't able to find what you were looking for."
 
 // ENDPOINTS DESCRIPTION
 
@@ -158,8 +160,8 @@ describe('Articles', () => {
         .expect(404)
         .then(({ body }) => {
           const { errorMessage } = body;
-          const recordNotFound = 'Sorry! That particular record was not found';
-          expect(errorMessage).toBe(recordNotFound);
+          const expectedResponse = recordNotFound;
+          expect(errorMessage).toBe(expectedResponse);
         });
     });
   });
@@ -197,13 +199,12 @@ describe('Articles', () => {
           expect(hasComments).toBeFalsy();
         });
     });
-    test('GET 400: Endpoint returns error message when article does not exist', () => {
+    test('GET 404: Endpoint returns error message when article does not exist', () => {
       return request(app)
         .get('/api/articles/200/comments')
         .expect(404)
         .then(({ body }) => {
-          const expectedResponse =
-            'Sorry! That particular record was not found';
+          const expectedResponse = recordNotFound;
           expect(body.errorMessage).toBe(expectedResponse);
         });
     });
@@ -254,7 +255,7 @@ describe('Articles', () => {
         .send(newComment)
         .expect(400)
         .then(({ body }) => {
-          const expectedResponse = 'Bad request';
+          const expectedResponse = badRequest;
           expect(body.errorMessage).toBe(expectedResponse);
         });
     });

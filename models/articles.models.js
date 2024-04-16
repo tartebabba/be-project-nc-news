@@ -1,8 +1,9 @@
 const db = require('../db/connection');
 
 // ERROR MESSAGES
-const recordNotFound = "Sorry! That particular record was not found"
-const recordsNotFound = 'Nothing to see here at the moment.';
+const recordNotFound =
+  "Sorry! We weren't able to find what you were looking for.";
+const recordsNotFound = "Uh oh! Looks like there's nothing to see here..";
 
 exports.checkArticleExists = (article_id) => {
   const checkArticleExistsQuery = `SELECT article_id FROM articles WHERE article_id = $1;`;
