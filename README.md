@@ -13,6 +13,9 @@ In order to run this app with your local databases, you must provide the appropr
 // .gitignore
 .env.test
 .env.development
+
+// Alternatively, you can use the below to ignore all .env files.
+.env*
 ```
 
 The 'connection.js' file will appropriately use the correct environment variables for testing.

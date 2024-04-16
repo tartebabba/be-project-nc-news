@@ -4,9 +4,7 @@ const db = require('../db/connection');
 const seed = require('../db/seeds/seed');
 const data = require('../db/data/test-data/index');
 const endpoints = require('../endpoints.json');
-
-
-// require('jest-sorted') ← not required for now.
+require('jest-sorted');
 
 beforeEach(() => {
   return seed(data);
@@ -63,96 +61,103 @@ describe('Topics', () => {
         });
       });
   });
-  test.todo('Test for no topics found..?');
 });
 
 // ARTICLES
 describe('Articles', () => {
-  test('GET 200: Endpoint returns all articles', () => {
-    return request(app)
-      .get('/api/articles')
-      .expect(200)
-      .then(({ body }) => {
-        const { articles } = body;
-        const expectedKeys = [
-          'article_id',
-          'title',
-          'topic',
-          'author',
-          'body',
-          'created_at',
-          'votes',
-          'article_img_url',
-          'comment_count',
-        ];
-        const expectedArticle = {
-          article_id: expect.any(Number),
-          title: expect.any(String),
-          topic: expect.any(String),
-          author: expect.any(String),
-          body: expect.any(String),
-          created_at: expect.any(String),
-          votes: expect.any(Number),
-          article_img_url: expect.any(String),
-          comment_count: expect.any(String),
-        };
-        expect(articles.length).toBe(13);
-        articles.forEach((articles) => {
-          expect(Object.keys(articles)).toEqual(expectedKeys);
-          expect(articles).toMatchObject(expectedArticle);
+  describe('All Articles', () => {
+    test('GET 200: Endpoint returns all articles', () => {
+      return request(app)
+        .get('/api/articles')
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          const expectedKeys = [
+            'article_id',
+            'title',
+            'topic',
+            'author',
+            'body',
+            'created_at',
+            'votes',
+            'article_img_url',
+            'comment_count',
+          ];
+          const expectedArticle = {
+            article_id: expect.any(Number),
+            title: expect.any(String),
+            topic: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(String),
+          };
+          const isDescending = true;
+          expect(articles).toBeSortedBy('created_at', {
+            descending: isDescending,
+          });
+          expect(articles.length).toBe(13);
+          articles.forEach((articles) => {
+            expect(Object.keys(articles)).toEqual(expectedKeys);
+            expect(articles).toMatchObject(expectedArticle);
+          });
         });
-      });
+    });
   });
-  test('GET 200: Endpoint returns an a singular article by ID, with the appropriate properties.', () => {
-    return request(app)
-      .get('/api/articles/1')
-      .expect(200)
-      .then(({ body }) => {
-        const { article } = body;
-        const expectedArticle = {
-          article_id: 1,
-          title: 'Living in the shadow of a great man',
-          topic: 'mitch',
-          author: 'butter_bridge',
-          body: 'I find this existence challenging',
-          created_at: '2020-07-09T20:11:00.000Z',
-          votes: 100,
-          article_img_url:
-            'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
-        };
-        const expectedKeys = [
-          'article_id',
-          'title',
-          'topic',
-          'author',
-          'body',
-          'created_at',
-          'votes',
-          'article_img_url',
-        ];
-        expectedKeys.forEach((key) => {
-          expect(key in article).toBe(true);
+  describe('Specific Articles', () => {
+    test('GET 200: Endpoint returns an a singular article by ID, with the appropriate properties.', () => {
+      return request(app)
+        .get('/api/articles/1')
+        .expect(200)
+        .then(({ body }) => {
+          const { article } = body;
+          const expectedArticle = {
+            article_id: 1,
+            title: 'Living in the shadow of a great man',
+            topic: 'mitch',
+            author: 'butter_bridge',
+            body: 'I find this existence challenging',
+            created_at: '2020-07-09T20:11:00.000Z',
+            votes: 100,
+            article_img_url:
+              'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+          };
+          const expectedKeys = [
+            'article_id',
+            'title',
+            'topic',
+            'author',
+            'body',
+            'created_at',
+            'votes',
+            'article_img_url',
+          ];
+          expectedKeys.forEach((key) => {
+            expect(key in article).toBe(true);
+          });
+          expect(Object.keys(article).length).toBe(8);
+          expect(article).toMatchObject(expectedArticle);
+          expect(typeof article.article_id).toBe('number');
+          expect(typeof article.title).toBe('string');
+          expect(typeof article.topic).toBe('string');
+          expect(typeof article.author).toBe('string');
+          expect(typeof article.body).toBe('string');
+          expect(typeof article.created_at).toBe('string');
+          expect(typeof article.votes).toBe('number');
+          expect(typeof article.article_img_url).toBe('string');
         });
-        expect(Object.keys(article).length).toBe(8);
-        expect(article).toMatchObject(expectedArticle);
-        expect(typeof article.article_id).toBe('number');
-        expect(typeof article.title).toBe('string');
-        expect(typeof article.topic).toBe('string');
-        expect(typeof article.author).toBe('string');
-        expect(typeof article.body).toBe('string');
-        expect(typeof article.created_at).toBe('string');
-        expect(typeof article.votes).toBe('number');
-        expect(typeof article.article_img_url).toBe('string');
-      });
-  });
-  test('Get 404: Endpoint returns an error when an article_id is not available', () => {
-    return request(app)
-      .get('/api/articles/999999')
-      .expect(404)
-      .then(({ body }) => {
-        const { errorMessage } = body;
-        const recordNotFound = 'Sorry! That particular record was not found';
-        expect(errorMessage).toBe(recordNotFound);
-      });
+    });
+    test('Get 404: Endpoint returns an error when an article_id is not available', () => {
+      return request(app)
+        .get('/api/articles/999999')
+        .expect(404)
+        .then(({ body }) => {
+          const { errorMessage } = body;
+          const recordNotFound = 'Sorry! That particular record was not found';
+          expect(errorMessage).toBe(recordNotFound);
+        });
+    });
   });
 });
