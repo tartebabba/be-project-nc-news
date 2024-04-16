@@ -9,7 +9,7 @@ exports.sendGeneric404Error = (req, res) => {
 };
 
 exports.sendErrorHandled = (err, req, res, next) => {
-  console.log(err.code, 'errorBeingHandled'); // ! Keeping this to manage debug errors.
+  // console.log(err.code, 'errorBeingHandled'); // ! Keeping this to manage debug errors.
   // ERROR MESSAGES
   const badRequest = 'Bad request';
 
