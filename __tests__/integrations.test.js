@@ -185,12 +185,22 @@ describe('Articles', () => {
           });
         });
     });
-    test('GET 404: Endpoint returns error message when article has no comments', () => {
+    test('GET 200: Endpoint returns an empty array when article has no comments', () => {
       return request(app)
         .get('/api/articles/2/comments')
-        .expect(404)
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          const hasComments = comments.length;
+          expect(hasComments).toBeFalsy();
+        });
+    });
+    test('GET 400: Endpoint returns error message when article does not exist', () => {
+      return request(app)
+        .get('/api/articles/200/comments')
+        .expect(400)
         .then(({ body }) => {
-          const expectedResponse = 'Nothing to see here at the moment.';
+          const expectedResponse =
+            'Sorry! That particular record was not found';
           expect(body.errorMessage).toBe(expectedResponse);
         });
     });
