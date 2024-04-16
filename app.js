@@ -8,6 +8,7 @@ const {
 const {
   getArticleByID,
   getArticles,
+  getArticleComments,
 } = require('./controllers/articles.controller');
 
 const { sendGeneric404Error, sendErrorHandled } = require('./errors');
@@ -21,6 +22,8 @@ app.get('/api/topics', getTopics);
 app.get('/api/articles', getArticles);
 
 app.get('/api/articles/:article_id', getArticleByID);
+
+app.get('/api/articles/:article_id/comments', getArticleComments);
 
 app.use(sendErrorHandled);
 

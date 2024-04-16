@@ -160,4 +160,39 @@ describe('Articles', () => {
         });
     });
   });
+  describe('GET /api/articles/:article_id/comments', () => {
+    test('GET 200: Endpoint returns all article comments from the specified article_id', () => {
+      return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({ body: { comments } }) => {
+          const article_id = 1;
+          const expectedComment = {
+            comment_id: expect.any(Number),
+            article_id: expect.any(Number),
+            author: expect.any(String),
+            body: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+          };
+          const isDescending = true;
+          expect(comments).toBeSortedBy('created_at', {
+            descending: isDescending,
+          });
+          comments.forEach((comment) => {
+            expect(comment.article_id).toBe(article_id);
+            expect(comment).toMatchObject(expectedComment);
+          });
+        });
+    });
+    test('GET 404: Endpoint returns error message when article has no comments', () => {
+      return request(app)
+        .get('/api/articles/2/comments')
+        .expect(404)
+        .then(({ body }) => {
+          const expectedResponse = 'Nothing to see here at the moment.';
+          expect(body.errorMessage).toBe(expectedResponse);
+        });
+    });
+  });
 });
