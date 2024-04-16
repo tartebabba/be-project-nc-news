@@ -12,6 +12,7 @@ exports.sendErrorHandled = (err, req, res, next) => {
   // console.log(err.code, 'errorBeingHandled'); // ! Keeping this to manage debug errors.
   // ERROR MESSAGES
   const badRequest = 'Bad request';
+  const invalidInput = 'Invalid input: incorrect data format.';
 
   // ERROR ROUTING
   if (err.status && err.errorMessage) {
@@ -24,6 +25,10 @@ exports.sendErrorHandled = (err, req, res, next) => {
     if (err.code === '23503') {
       // ! FK Violation
       res.status(400).send({ errorMessage: badRequest });
+    }
+    if (err.code === '22P02') {
+      // ! Invalid Text Representation
+      res.status(400).send({ errorMessage: invalidInput });
     }
   }
   return next(err);

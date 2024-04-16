@@ -34,6 +34,7 @@ describe('404: Incorrect URL', () => {
 // ! Ensure to align with error.js messages
 const badRequest = "Bad request" 
 const recordNotFound = "Sorry! We weren't able to find what you were looking for."
+const invalidInput = 'Invalid input: incorrect data format.';
 
 // ENDPOINTS DESCRIPTION
 
@@ -273,5 +274,51 @@ describe('Articles', () => {
         const expectedResponse = badRequest;
         expect(body.errorMessage).toBe(expectedResponse);
       });
+  });
+  describe('PATCH /api/articles/:article_id', () => {
+    test('PATCH 200: Endpoint accepts a patch object and returns an updated article_id', () => {
+      const newVote = 1;
+      const updateObject = { inc_votes: newVote };
+      return request(app)
+        .patch('/api/articles/1')
+        .send(updateObject)
+        .expect(200)
+        .then(({ body: { updatedArticle } }) => {
+          const expectedObject = {
+            article_id: 1,
+            title: 'Living in the shadow of a great man',
+            topic: 'mitch',
+            author: 'butter_bridge',
+            body: 'I find this existence challenging',
+            created_at: '2020-07-09T20:11:00.000Z',
+            votes: 100 + newVote,
+            article_img_url:
+              'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+          };
+          expect(updatedArticle).toMatchObject(expectedObject);
+        });
+    });
+    test('PATCH 404: Endpoint returns an error when given an invalid article_id', () => {
+      const newVote = 1;
+      const updateObject = { inc_votes: newVote };
+      return request(app)
+        .patch('/api/articles/3700000')
+        .send(updateObject)
+        .expect(404)
+        .then(({ body: { errorMessage } }) => {
+          expect(errorMessage).toBe(recordNotFound);
+        });
+    });
+    test('PATCH 400: Endpoint returns an error when given an invalid article_id', () => {
+      const newVote = 'string';
+      const updateObject = { inc_votes: newVote };
+      return request(app)
+        .patch('/api/articles/1')
+        .send(updateObject)
+        .expect(400)
+        .then(({ body: { errorMessage } }) => {
+          expect(errorMessage).toBe(invalidInput);
+        });
+    });
   });
 });
