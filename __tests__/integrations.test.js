@@ -30,6 +30,9 @@ describe('404: Incorrect URL', () => {
   });
 });
 
+// ERROR MESSAGES
+const badRequest = "Bad request" // Ensure to align with error.js messages
+
 // ENDPOINTS DESCRIPTION
 
 describe('ENDPOINTS', () => {
@@ -197,12 +200,77 @@ describe('Articles', () => {
     test('GET 400: Endpoint returns error message when article does not exist', () => {
       return request(app)
         .get('/api/articles/200/comments')
-        .expect(400)
+        .expect(404)
         .then(({ body }) => {
           const expectedResponse =
             'Sorry! That particular record was not found';
           expect(body.errorMessage).toBe(expectedResponse);
         });
     });
+  });
+  describe('POST /api/articles/:article_id/comments', () => {
+    test('POST 200: Endpoint adds a new comment to the corresponding article', () => {
+      const newComment = {
+        username: 'butter_bridge',
+        body: 'example comment',
+      };
+      return request(app)
+        .post('/api/articles/2/comments')
+        .send(newComment)
+        .expect(201)
+        .then(({ body: { comment } }) => {
+          expectedResponse = {
+            comment_id: expect.any(Number),
+            body: newComment.body,
+            article_id: expect.any(Number),
+            author: newComment.username,
+            votes: expect.any(Number),
+            created_at: expect.any(String),
+          };
+          expect(comment).toMatchObject(expectedResponse);
+        });
+    });
+    test('POST 400: Endpoint returns an error for an invalid article_id', () => {
+      const newComment = {
+        username: 'butter_bridge',
+        body: 'example valid comment',
+      };
+      return request(app)
+        .post('/api/articles/37/comments')
+        .send(newComment)
+        .expect(400)
+        .then(({ body }) => {
+          const expectedResponse = badRequest;
+          expect(body.errorMessage).toBe(expectedResponse);
+        });
+    });
+    test('POST 400: Endpoint returns an error for an invalid post request - bad body', () => {
+      const newComment = {
+        named_user: 'Saima',
+        comment: 'example invalid comment',
+      };
+      return request(app)
+        .post('/api/articles/1/comments')
+        .send(newComment)
+        .expect(400)
+        .then(({ body }) => {
+          const expectedResponse = 'Bad request';
+          expect(body.errorMessage).toBe(expectedResponse);
+        });
+    });
+  });
+  test('POST 400: Endpoint returns an error for an invalid post request - isUser', () => {
+    const newComment = {
+      username: 'saima',
+      body: 'example valid comment',
+    };
+    return request(app)
+      .post('/api/articles/2/comments')
+      .send(newComment)
+      .expect(400)
+      .then(({ body }) => {
+        const expectedResponse = badRequest;
+        expect(body.errorMessage).toBe(expectedResponse);
+      });
   });
 });

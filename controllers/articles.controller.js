@@ -3,6 +3,8 @@ const {
   fetchAllArticles,
   fetchArticleComments,
   checkArticleExists,
+  checkUserExists,
+  addNewComment,
 } = require('../models/articles.models');
 
 exports.getArticles = (req, res, next) => {
@@ -24,13 +26,22 @@ exports.getArticleByID = (req, res, next) => {
 
 exports.getArticleComments = (req, res, next) => {
   const { article_id } = req.params;
-
   return Promise.all([
     fetchArticleComments(article_id),
     checkArticleExists(article_id),
   ])
     .then(([comments]) => {
       res.status(200).send({ comments });
+    })
+    .catch((err) => next(err));
+};
+
+exports.postArticleComment = (req, res, next) => {
+  const { article_id } = req.params;
+  const { body } = req;
+  return addNewComment(article_id, body)
+    .then((comment) => {
+      res.status(201).send({ comment });
     })
     .catch((err) => next(err));
 };
