@@ -1,4 +1,4 @@
-// Error Handler
+// Error Handlers
 
 exports.sendGeneric404Error = (req, res) => {
   res.status(404).send({
@@ -9,11 +9,21 @@ exports.sendGeneric404Error = (req, res) => {
 };
 
 exports.sendErrorHandled = (err, req, res, next) => {
+  console.log(err.code, 'errorBeingHandled'); // ! Keeping this to manage debug errors.
+  // ERROR MESSAGES
+  const badRequest = 'Bad request';
+
+  // ERROR ROUTING
   if (err.status && err.errorMessage) {
     res.status(err.status).send({ errorMessage: err.errorMessage });
   } else {
     if (err.code === '23502') {
-      res.status(400).send({ errorMessage: 'Bad request' });
+      // ! Null Violation
+      res.status(400).send({ errorMessage: badRequest });
+    }
+    if (err.code === '23503') {
+      // ! FK Violation
+      res.status(400).send({ errorMessage: badRequest });
     }
   }
   return next(err);

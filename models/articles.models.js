@@ -5,10 +5,10 @@ const recordNotFound = "Sorry! That particular record was not found"
 const recordsNotFound = 'Nothing to see here at the moment.';
 
 exports.checkArticleExists = (article_id) => {
-  const checkArticleExistsQuery = `SELECT article_id FROM articles WHERE article_id = $1`;
+  const checkArticleExistsQuery = `SELECT article_id FROM articles WHERE article_id = $1;`;
   return db.query(checkArticleExistsQuery, [article_id]).then(({ rows }) => {
     if (!rows.length)
-      return Promise.reject({ status: 400, errorMessage: recordNotFound });
+      return Promise.reject({ status: 404, errorMessage: recordNotFound });
     else return rows[0];
   });
 };
@@ -41,5 +41,16 @@ exports.fetchArticleComments = (articleID) => {
   WHERE article_id = $1
   ORDER BY created_at desc`;
   return db.query(commentsOfArticleQuery, [articleID]).then(({ rows }) => rows);
+};
+
+exports.addNewComment = (articleID, { username, body }) => {
+  const insertCommentQuery = `INSERT INTO comments
+  (author, body, article_id)
+  VALUES
+    ($1, $2, $3)
+  RETURNING *;`;
+  return db
+    .query(insertCommentQuery, [username, body, articleID])
+    .then(({ rows }) => rows[0]);
 };
 

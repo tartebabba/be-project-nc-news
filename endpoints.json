@@ -55,5 +55,23 @@
         "votes": 0
       }
     }
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "Inserts a comment for the particular article and returns the complete comment record",
+    "exampleRequest": {
+      "username": "weegembump",
+      "body": "Comment on the article.."
+    },
+    "exampleResponse": {
+      "comments": {
+        "article_id": 1,
+        "comment_id": 1,
+        "author": "weegembump",
+        "body": "Comment on the article..",
+        "created_at": "2018-05-30T15:59:13.341Z",
+        "votes": 0
+      }
+    },
+    "invalid request description": "a problematic name or invalid username (ForeignKey) will result in a 400 error with bad request "
   }
 }
