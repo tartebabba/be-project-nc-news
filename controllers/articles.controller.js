@@ -30,7 +30,6 @@ exports.getArticleComments = (req, res, next) => {
     checkArticleExists(article_id),
   ])
     .then(([comments]) => {
-      console.log(comments, 'controller');
       res.status(200).send({ comments });
     })
     .catch((err) => next(err));

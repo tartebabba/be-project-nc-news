@@ -7,7 +7,6 @@ const recordsNotFound = 'Nothing to see here at the moment.';
 exports.checkArticleExists = (article_id) => {
   const checkArticleExistsQuery = `SELECT article_id FROM articles WHERE article_id = $1`;
   return db.query(checkArticleExistsQuery, [article_id]).then(({ rows }) => {
-    console.log(rows.length);
     if (!rows.length)
       return Promise.reject({ status: 400, errorMessage: recordNotFound });
     else return rows[0];
