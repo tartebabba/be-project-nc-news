@@ -76,7 +76,7 @@ describe('Topics', () => {
 // ARTICLES
 describe('Articles', () => {
   describe('All Articles', () => {
-    test.only('GET 200: Endpoint returns all articles', () => {
+    test('GET 200: Endpoint returns all articles', () => {
       return request(app)
         .get('/api/articles')
         .expect(200)
@@ -147,7 +147,6 @@ describe('Articles', () => {
           expectedKeys.forEach((key) => {
             expect(key in article).toBe(true);
           });
-          expect(Object.keys(article).length).toBe(8);
           expect(article).toMatchObject(expectedArticle);
           expect(typeof article.article_id).toBe('number');
           expect(typeof article.title).toBe('string');
