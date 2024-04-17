@@ -15,6 +15,7 @@ const {
 } = require('./controllers/articles.controller');
 
 const { sendGeneric404Error, sendErrorHandled } = require('./errors');
+const { getAllUsers } = require('./controllers/users.controller');
 
 app.use(express.json());
 
@@ -35,6 +36,9 @@ app.post('/api/articles/:article_id/comments', postArticleComment);
 app.patch('/api/articles/:article_id', patchArticleByID);
 
 app.delete('/api/comments/:comment_id', deleteCommentByID);
+
+// USER HANDLING
+app.get('/api/users', getAllUsers);
 
 // ERROR HANDLING
 app.use(sendErrorHandled);
