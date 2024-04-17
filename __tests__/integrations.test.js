@@ -352,7 +352,7 @@ describe('Articles', () => {
 });
 
 // USERS
-describe.only('Users', () => {
+describe('Users', () => {
   describe('USERS: /api/users', () => {
     test('GET 200: Endpoint returns all users', () => {
       return request(app)
