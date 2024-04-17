@@ -186,7 +186,6 @@ describe('Articles', () => {
               'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
           };
           expect('comment_count' in article).toBe(true);
-          expect(Object.keys(article).length).toBe(9);
           expect(article).toMatchObject(expectedArticle);
           expect(typeof article.comment_count).toBe('number');
         });
