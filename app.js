@@ -11,13 +11,10 @@ const {
   getArticleComments,
   postArticleComment,
   patchArticleByID,
+  deleteCommentByID,
 } = require('./controllers/articles.controller');
 
-const {
-  sendGeneric404Error,
-  sendErrorHandled,
-  errorLogger,
-} = require('./errors');
+const { sendGeneric404Error, sendErrorHandled } = require('./errors');
 
 app.use(express.json());
 
@@ -36,6 +33,8 @@ app.get('/api/articles/:article_id/comments', getArticleComments);
 app.post('/api/articles/:article_id/comments', postArticleComment);
 
 app.patch('/api/articles/:article_id', patchArticleByID);
+
+app.delete('/api/comments/:comment_id', deleteCommentByID);
 
 // ERROR HANDLING
 app.use(sendErrorHandled);

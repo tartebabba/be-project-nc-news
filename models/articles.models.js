@@ -68,3 +68,14 @@ exports.updateArticle = (articleID, { inc_votes: votes }) => {
     .then(({ rows }) => rows[0]);
 };
 
+exports.removeComment = (commentID) => {
+  commentID;
+  const removeCommentQuery = `DELETE FROM comments
+  WHERE comment_id = $1
+  RETURNING *;`;
+  return db.query(removeCommentQuery, [commentID]).then(({ rows }) => {
+    if (!rows.length)
+      return Promise.reject({ status: 404, errorMessage: recordNotFound });
+    else rows[0];
+  });
+};
