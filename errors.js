@@ -9,7 +9,7 @@ exports.sendGeneric404Error = (req, res) => {
 };
 
 exports.sendErrorHandled = (err, req, res, next) => {
-  // console.log(err.code, 'errorBeingHandled'); // ! Keeping this to manage debug errors.
+  console.log(err.code, 'errorBeingHandled'); // ! Keeping this to manage debug errors.
   // ERROR MESSAGES
   const badRequest = 'Bad request';
   const invalidInput = 'Invalid input: incorrect data format.';
@@ -28,6 +28,10 @@ exports.sendErrorHandled = (err, req, res, next) => {
     if (err.code === '22P02') {
       // ! Invalid Text Representation
       res.status(400).send({ errorMessage: invalidInput });
+    }
+    if (err.code === '42702') {
+      // ! Abiguous Column
+      res.status(400).send({ errorMessage: badRequest });
     }
   }
   return next(err);

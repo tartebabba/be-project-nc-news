@@ -21,6 +21,7 @@ exports.getArticles = (req, res, next) => {
   } else {
     return fetchArticles(topic)
       .then((articles) => {
+
         res.status(200).send({ articles });
       })
       .catch((err) => next(err));
@@ -31,6 +32,7 @@ exports.getArticleByID = (req, res, next) => {
   const { article_id } = req.params;
   return fetchArticleByID(article_id)
     .then((article) => {
+      article.comment_count = parseInt(article.comment_count);
       res.status(200).send({ article });
     })
     .catch((err) => next(err));
