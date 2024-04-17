@@ -76,7 +76,7 @@ describe('Topics', () => {
 // ARTICLES
 describe('Articles', () => {
   describe('All Articles', () => {
-    test('GET 200: Endpoint returns all articles', () => {
+    test.only('GET 200: Endpoint returns all articles', () => {
       return request(app)
         .get('/api/articles')
         .expect(200)
@@ -167,6 +167,29 @@ describe('Articles', () => {
           const { errorMessage } = body;
           const expectedResponse = recordNotFound;
           expect(errorMessage).toBe(expectedResponse);
+        });
+    });
+    test('GET 200: Endpoint returns an a singular article by ID, with a comment count', () => {
+      return request(app)
+        .get('/api/articles/1')
+        .expect(200)
+        .then(({ body: { article } }) => {
+          const expectedArticle = {
+            article_id: 1,
+            title: 'Living in the shadow of a great man',
+            topic: 'mitch',
+            author: 'butter_bridge',
+            body: 'I find this existence challenging',
+            created_at: '2020-07-09T20:11:00.000Z',
+            votes: 100,
+            comment_count: 11,
+            article_img_url:
+              'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700',
+          };
+          expect('comment_count' in article).toBe(true);
+          expect(Object.keys(article).length).toBe(9);
+          expect(article).toMatchObject(expectedArticle);
+          expect(typeof article.comment_count).toBe('number');
         });
     });
   });
