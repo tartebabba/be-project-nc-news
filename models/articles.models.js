@@ -52,7 +52,6 @@ exports.fetchArticles = (topic) => {
 
   filteredArticlesQuery += ` GROUP BY a.article_id `;
   filteredArticlesQuery += ` ORDER BY a.created_at desc;`;
-  console.log(filteredArticlesQuery);
   return db.query(filteredArticlesQuery, queryVals).then(({ rows }) => {
     if (!rows.length)
       return Promise.reject({ status: 404, errorMessage: recordsNotFound });
