@@ -4,6 +4,7 @@ const db = require('../db/connection');
 const seed = require('../db/seeds/seed');
 const data = require('../db/data/test-data/index');
 const endpoints = require('../endpoints.json');
+const users = require('../db/data/test-data/users');
 require('jest-sorted');
 
 beforeEach(() => {
@@ -32,8 +33,9 @@ describe('404: Incorrect URL', () => {
 
 // ERROR MESSAGES
 // ! Ensure to align with error.js messages
-const badRequest = "Bad request" 
-const recordNotFound = "Sorry! We weren't able to find what you were looking for."
+const badRequest = 'Bad request';
+const recordNotFound =
+  "Sorry! We weren't able to find what you were looking for.";
 const invalidInput = 'Invalid input: incorrect data format.';
 
 // ENDPOINTS DESCRIPTION
@@ -347,6 +349,26 @@ describe('Articles', () => {
         });
     });
   });
-  
-  
+});
+
+// USERS
+describe.only('Users', () => {
+  describe('USERS: /api/users', () => {
+    test('GET 200: Endpoint returns all users', () => {
+      return request(app)
+        .get('/api/users')
+        .expect(200)
+        .then(({ body: { users } }) => {
+          const expectedObject = {
+            username: expect.any(String),
+            name: expect.any(String),
+            avatar_url: expect.any(String),
+          };
+          users.forEach((user) => {
+            expect(Object.keys(user).length).toBe(3);
+            expect(user).toMatchObject(expectedObject);
+          });
+        });
+    });
+  });
 });

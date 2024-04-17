@@ -98,5 +98,14 @@
     "exampleRequest": "Just the url is required",
     "exampleResponse": "No response apart from a 204 error",
     "invalid request description": "invalid comment_id results in a 404 error, and an invalid data type (string) results in a 400 invalid input error"
+  },
+  "GET /api/users": {
+    "description": "serves an array of all users",
+    "queries": [],
+    "exampleResponse": {
+      "topics": [
+        { "username": "RichNC", "name": "RichieRich", "avatar_url": "url" }
+      ]
+    }
   }
 }
