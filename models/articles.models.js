@@ -1,9 +1,12 @@
 const db = require('../db/connection');
+const { filter } = require('../db/data/test-data/articles');
 
 // ERROR MESSAGES
 const recordNotFound =
   "Sorry! We weren't able to find what you were looking for.";
 const recordsNotFound = "Uh oh! Looks like there's nothing to see here..";
+const invalidInput = 'Invalid input: incorrect data format.';
+
 
 exports.checkArticleExists = (article_id) => {
   const checkArticleExistsQuery = `SELECT article_id FROM articles WHERE article_id = $1;`;
@@ -21,6 +24,36 @@ exports.fetchAllArticles = () => {
   GROUP BY a.article_id
   ORDER BY a.created_at desc;`;
   return db.query(allArticlesQuery).then(({ rows }) => {
+    if (!rows.length)
+      return Promise.reject({ status: 404, errorMessage: recordsNotFound });
+    else return rows;
+  });
+};
+
+exports.fetchArticles = (topic) => {
+  if (!topic)
+    return Promise.reject({ status: 400, errorMessage: invalidInput });
+
+  let filteredArticlesQuery = `SELECT a.article_id, a.title, a.topic, a.author, a.body, a.created_at, a.votes, a.article_img_url, COUNT(c.comment_id) as comment_count
+  FROM articles AS a
+  LEFT JOIN comments AS c ON a.article_id = c.article_id`;
+
+  const conditions = [];
+  const queryVals = [];
+
+  if (topic) {
+    conditions.push(`topic = $${conditions.length + 1}`);
+    queryVals.push(topic.toLowerCase());
+  }
+
+  if (conditions.length) {
+    filteredArticlesQuery += ' WHERE ' + conditions.join(' AND ');
+  }
+
+  filteredArticlesQuery += ` GROUP BY a.article_id `;
+  filteredArticlesQuery += ` ORDER BY a.created_at desc;`;
+  console.log(filteredArticlesQuery);
+  return db.query(filteredArticlesQuery, queryVals).then(({ rows }) => {
     if (!rows.length)
       return Promise.reject({ status: 404, errorMessage: recordsNotFound });
     else return rows;
