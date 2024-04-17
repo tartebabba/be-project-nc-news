@@ -6,6 +6,7 @@ const {
   checkUserExists,
   addNewComment,
   updateArticle,
+  removeComment,
 } = require('../models/articles.models');
 
 exports.getArticles = (req, res, next) => {
@@ -59,3 +60,14 @@ exports.patchArticleByID = (req, res, next) => {
     })
     .catch((err) => next(err));
 };
+
+exports.deleteCommentByID = (req, res, next) => {
+  const { comment_id } = req.params;
+  return removeComment(comment_id)
+    .then((deletedComment) => {
+      deletedComment;
+      res.status(204).send();
+    })
+    .catch((err) => next(err));
+};
+

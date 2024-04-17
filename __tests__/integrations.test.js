@@ -309,7 +309,7 @@ describe('Articles', () => {
           expect(errorMessage).toBe(recordNotFound);
         });
     });
-    test('PATCH 400: Endpoint returns an error when given an invalid article_id', () => {
+    test('PATCH 400: Endpoint returns an error when given an invalid data input', () => {
       const newVote = 'string';
       const updateObject = { inc_votes: newVote };
       return request(app)
@@ -321,4 +321,32 @@ describe('Articles', () => {
         });
     });
   });
+  describe('DELETE: /api/comments/:comment_id', () => {
+    test('DELETE 204: Endpoint returns 204 and no content on successful delete', () => {
+      return request(app)
+        .delete('/api/comments/2')
+        .expect(204)
+        .then(({ body }) => {
+          expect(body).toEqual({});
+        });
+    });
+    test('DELETE 400: Endpoint returns invalid input response when given invalid comment_id data type', () => {
+      return request(app)
+        .delete('/api/comments/helloAgainSaima')
+        .expect(400)
+        .then(({ body: { errorMessage } }) => {
+          expect(errorMessage).toBe(invalidInput);
+        });
+    });
+    test('DELETE 404: Endpoint returns record not found response when given a valid comment_id, but doesnt exist', () => {
+      return request(app)
+        .delete('/api/comments/37')
+        .expect(404)
+        .then(({ body: { errorMessage } }) => {
+          expect(errorMessage).toBe(recordNotFound);
+        });
+    });
+  });
+  
+  
 });

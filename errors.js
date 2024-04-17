@@ -13,7 +13,6 @@ exports.sendErrorHandled = (err, req, res, next) => {
   // ERROR MESSAGES
   const badRequest = 'Bad request';
   const invalidInput = 'Invalid input: incorrect data format.';
-
   // ERROR ROUTING
   if (err.status && err.errorMessage) {
     res.status(err.status).send({ errorMessage: err.errorMessage });

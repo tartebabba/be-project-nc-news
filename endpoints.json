@@ -92,5 +92,11 @@
       }
     },
     "invalid request description": "invalid article_id results in a 404 error, and an invalid data type (i.e., votes is not an int) results in a 400 invalid input error"
+  },
+  "DELETE /api/comments/:comment_id": {
+    "description": "Deletes a comment with the corresponding id",
+    "exampleRequest": "Just the url is required",
+    "exampleResponse": "No response apart from a 204 error",
+    "invalid request description": "invalid comment_id results in a 404 error, and an invalid data type (string) results in a 400 invalid input error"
   }
 }
