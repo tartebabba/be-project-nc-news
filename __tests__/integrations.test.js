@@ -5,6 +5,7 @@ const seed = require('../db/seeds/seed');
 const data = require('../db/data/test-data/index');
 const endpoints = require('../endpoints.json');
 const users = require('../db/data/test-data/users');
+const articles = require('../db/data/test-data/articles');
 require('jest-sorted');
 
 beforeEach(() => {
@@ -36,6 +37,7 @@ describe('404: Incorrect URL', () => {
 const badRequest = 'Bad request';
 const recordNotFound =
   "Sorry! We weren't able to find what you were looking for.";
+const recordsNotFound = "Uh oh! Looks like there's nothing to see here..";
 const invalidInput = 'Invalid input: incorrect data format.';
 
 // ENDPOINTS DESCRIPTION
@@ -346,6 +348,48 @@ describe('Articles', () => {
         .expect(404)
         .then(({ body: { errorMessage } }) => {
           expect(errorMessage).toBe(recordNotFound);
+        });
+    });
+  });
+  describe('GET: /api/articles?query', () => {
+    test('GET 200: Endpoint returns all articles as filtered by topic', () => {
+      return request(app)
+        .get('/api/articles?topic=mitch')
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          const expectedArticle = {
+            article_id: expect.any(Number),
+            title: expect.any(String),
+            topic: 'mitch',
+            author: expect.any(String),
+            body: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(String),
+          };
+          articles.forEach((article) => {
+            expect(article).toMatchObject(expectedArticle);
+          });
+          expect(articles).toBeSortedBy('created_at', {
+            descending: true,
+          });
+        });
+    });
+    test('GET 404: Endpoint returns 404 error for valid query, but no articles', () => {
+      return request(app)
+        .get('/api/articles?topic=Roisin')
+        .expect(404)
+        .then(({ body: { errorMessage } }) => {
+          expect(errorMessage).toBe(recordsNotFound);
+        });
+    });
+    test('GET 400: Endpoint returns 400 error for invalid query', () => {
+      return request(app)
+        .get('/api/articles?problematicQuery=roisin')
+        .expect(400)
+        .then(({ body: { errorMessage } }) => {
+          expect(errorMessage).toBe(invalidInput);
         });
     });
   });

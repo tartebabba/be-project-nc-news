@@ -7,14 +7,24 @@ const {
   addNewComment,
   updateArticle,
   removeComment,
+  fetchArticles,
 } = require('../models/articles.models');
 
 exports.getArticles = (req, res, next) => {
-  return fetchAllArticles()
-    .then((articles) => {
-      res.status(200).send({ articles });
-    })
-    .catch((err) => next(err));
+  const { topic } = req.query;
+  if (!Object.keys(req.query).length) {
+    return fetchAllArticles()
+      .then((articles) => {
+        res.status(200).send({ articles });
+      })
+      .catch((err) => next(err));
+  } else {
+    return fetchArticles(topic)
+      .then((articles) => {
+        res.status(200).send({ articles });
+      })
+      .catch((err) => next(err));
+  }
 };
 
 exports.getArticleByID = (req, res, next) => {
