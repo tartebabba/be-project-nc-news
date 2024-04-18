@@ -41,7 +41,6 @@ const recordsNotFound = "Uh oh! Looks like there's nothing to see here..";
 const invalidInput = 'Invalid input: incorrect data format.';
 
 // ENDPOINTS DESCRIPTION
-
 describe('ENDPOINTS', () => {
   test('GET 200: Endpoint returns the endpoints description file detailing all endpoints.', () => {
     return request(app)
