@@ -11,7 +11,6 @@ const {
 } = require('../models/articles.models');
 
 exports.getArticles = (req, res, next) => {
-  console.log(req.query);
   if (!Object.keys(req.query).length) {
     return fetchAllArticles()
       .then((articles) => {
