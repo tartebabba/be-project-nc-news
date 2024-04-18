@@ -4,8 +4,6 @@ const db = require('../db/connection');
 const seed = require('../db/seeds/seed');
 const data = require('../db/data/test-data/index');
 const endpoints = require('../endpoints.json');
-const users = require('../db/data/test-data/users');
-const articles = require('../db/data/test-data/articles');
 require('jest-sorted');
 
 beforeEach(() => {
@@ -54,7 +52,7 @@ describe('ENDPOINTS', () => {
 });
 
 // TOPICS
-describe('Topics', () => {
+describe('TOPICS', () => {
   test('GET 200: Endpoint returns an array of topics, with the slug and description.', () => {
     return request(app)
       .get('/api/topics')
@@ -73,8 +71,8 @@ describe('Topics', () => {
 });
 
 // ARTICLES
-describe('Articles', () => {
-  describe('All Articles', () => {
+describe('ARTICLES', () => {
+  describe('GET /api/articles - all articles', () => {
     test('GET 200: Endpoint returns all articles', () => {
       return request(app)
         .get('/api/articles')
@@ -114,8 +112,119 @@ describe('Articles', () => {
           });
         });
     });
+    describe('GET: /api/articles?query', () => {
+      test('GET 200: Endpoint returns all articles as filtered by topic', () => {
+        return request(app)
+          .get('/api/articles?topic=mitch')
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            const expectedArticle = {
+              article_id: expect.any(Number),
+              title: expect.any(String),
+              topic: 'mitch',
+              author: expect.any(String),
+              body: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              article_img_url: expect.any(String),
+              comment_count: expect.any(String),
+            };
+            articles.forEach((article) => {
+              expect(article).toMatchObject(expectedArticle);
+            });
+          });
+      });
+      test('GET 404: Endpoint returns 404 error for valid query, but no articles', () => {
+        return request(app)
+          .get('/api/articles?topic=Roisin')
+          .expect(404)
+          .then(({ body: { errorMessage } }) => {
+            expect(errorMessage).toBe(recordsNotFound);
+          });
+      });
+      test('GET 400: Endpoint returns 400 error for invalid query', () => {
+        return request(app)
+          .get('/api/articles?problematicQuery=roisin')
+          .expect(400)
+          .then(({ body: { errorMessage } }) => {
+            expect(errorMessage).toBe(invalidInput);
+          });
+      });
+      test('GET 200: Endpoint returns all articles with query sorted by created_at as DEFAULT', () => {
+        return request(app)
+          .get('/api/articles?topic=mitch')
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toBeSortedBy('created_at', {
+              descending: true,
+            });
+          });
+      });
+      test('GET 200: Endpoint returns all articles with author query sorted by created_at as DEFAULT', () => {
+        return request(app)
+          .get('/api/articles?author=butter_bridge')
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toBeSortedBy('created_at', {
+              descending: true,
+            });
+          });
+      });
+      test('GET 200: Endpoint returns all articles sorted by valid column with specified order_by - ASC', () => {
+        const sortColumn = 'topic';
+        return request(app)
+          .get(`/api/articles?order_by=asc&&sort_by=${sortColumn}`)
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toBeSortedBy(sortColumn, {
+              descending: false,
+            });
+          });
+      });
+      test('GET 200: Endpoint returns all articles sorted by valid column', () => {
+        const sortColumn = 'topic';
+        return request(app)
+          .get(`/api/articles?sort_by=${sortColumn}`)
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toBeSortedBy(sortColumn, {
+              descending: true,
+            });
+          });
+      });
+      test('GET 400: Endpoint returns an error when sort_by is an invalid column', () => {
+        const sortColumn = 'invalidColumn';
+        return request(app)
+          .get(`/api/articles?sort_by=${sortColumn}`)
+          .expect(400)
+          .then(({ body: { errorMessage } }) => {
+            expect(errorMessage).toBe(invalidInput);
+          });
+      });
+      test('GET 200: Endpoint returns all articles sorted by valid column with default DESC order', () => {
+        const sortColumn = 'title';
+        return request(app)
+          .get(`/api/articles?sort_by=${sortColumn}`)
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toBeSortedBy(sortColumn, {
+              descending: true,
+            });
+          });
+      });
+      test('GET 400: Endpoint returns an bad request error when one query of N query is invalid', () => {
+        const sortColumn = 'invalidColumn';
+        const orderBy = 'desc';
+        return request(app)
+          .get(`/api/articles?sort_by=${sortColumn}&&order_by=${orderBy}`)
+          .expect(400)
+          .then(({ body: { errorMessage } }) => {
+            expect(errorMessage).toBe(invalidInput);
+          });
+      });
+    });
   });
-  describe('Specific Articles', () => {
+  describe('GET /api/articles/:article_id - specific articles', () => {
     test('GET 200: Endpoint returns an a singular article by ID, with the appropriate properties.', () => {
       return request(app)
         .get('/api/articles/1')
@@ -284,20 +393,20 @@ describe('Articles', () => {
           expect(body.errorMessage).toBe(expectedResponse);
         });
     });
-  });
-  test('POST 400: Endpoint returns an error for an invalid post request - isUser', () => {
-    const newComment = {
-      username: 'saima',
-      body: 'example valid comment',
-    };
-    return request(app)
-      .post('/api/articles/2/comments')
-      .send(newComment)
-      .expect(400)
-      .then(({ body }) => {
-        const expectedResponse = badRequest;
-        expect(body.errorMessage).toBe(expectedResponse);
-      });
+    test('POST 400: Endpoint returns an error for an invalid post request - isUser', () => {
+      const newComment = {
+        username: 'saima',
+        body: 'example valid comment',
+      };
+      return request(app)
+        .post('/api/articles/2/comments')
+        .send(newComment)
+        .expect(400)
+        .then(({ body }) => {
+          const expectedResponse = badRequest;
+          expect(body.errorMessage).toBe(expectedResponse);
+        });
+    });
   });
   describe('PATCH /api/articles/:article_id', () => {
     test('PATCH 200: Endpoint accepts a patch object and returns an updated article_id', () => {
@@ -371,52 +480,10 @@ describe('Articles', () => {
         });
     });
   });
-  describe('GET: /api/articles?query', () => {
-    test('GET 200: Endpoint returns all articles as filtered by topic', () => {
-      return request(app)
-        .get('/api/articles?topic=mitch')
-        .expect(200)
-        .then(({ body: { articles } }) => {
-          const expectedArticle = {
-            article_id: expect.any(Number),
-            title: expect.any(String),
-            topic: 'mitch',
-            author: expect.any(String),
-            body: expect.any(String),
-            created_at: expect.any(String),
-            votes: expect.any(Number),
-            article_img_url: expect.any(String),
-            comment_count: expect.any(String),
-          };
-          articles.forEach((article) => {
-            expect(article).toMatchObject(expectedArticle);
-          });
-          expect(articles).toBeSortedBy('created_at', {
-            descending: true,
-          });
-        });
-    });
-    test('GET 404: Endpoint returns 404 error for valid query, but no articles', () => {
-      return request(app)
-        .get('/api/articles?topic=Roisin')
-        .expect(404)
-        .then(({ body: { errorMessage } }) => {
-          expect(errorMessage).toBe(recordsNotFound);
-        });
-    });
-    test('GET 400: Endpoint returns 400 error for invalid query', () => {
-      return request(app)
-        .get('/api/articles?problematicQuery=roisin')
-        .expect(400)
-        .then(({ body: { errorMessage } }) => {
-          expect(errorMessage).toBe(invalidInput);
-        });
-    });
-  });
 });
 
 // USERS
-describe('Users', () => {
+describe('USERS', () => {
   describe('USERS: /api/users', () => {
     test('GET 200: Endpoint returns all users', () => {
       return request(app)
