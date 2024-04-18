@@ -48,14 +48,6 @@ exports.fetchArticles = (query) => {
     'comment_count',
   ];
   const validOrderBys = ['asc', 'desc'];
-  console.log(
-    author,
-    topic,
-    order_by,
-    validSortBys.includes(sort_by),
-    validOrderBys.includes(order_by)
-  );
-
   if (!validSortBys.includes(sort_by))
     return Promise.reject({ status: 400, errorMessage: invalidInput });
 
@@ -84,7 +76,6 @@ exports.fetchArticles = (query) => {
   if (validSortBys.includes(sort_by) && validOrderBys.includes(order_by)) {
     filteredArticlesQuery += ` ORDER BY a.${sort_by} ${order_by};`;
   }
-  console.log(filteredArticlesQuery);
   return db.query(filteredArticlesQuery, queryVals).then(({ rows }) => {
     if (!rows.length)
       return Promise.reject({ status: 404, errorMessage: recordsNotFound });
