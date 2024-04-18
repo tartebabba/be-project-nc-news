@@ -1,5 +1,4 @@
 const db = require('../db/connection');
-const { filter } = require('../db/data/test-data/articles');
 
 // ERROR MESSAGES
 const recordNotFound =
@@ -7,7 +6,7 @@ const recordNotFound =
 const recordsNotFound = "Uh oh! Looks like there's nothing to see here..";
 const invalidInput = 'Invalid input: incorrect data format.';
 
-
+// UTILS
 exports.checkArticleExists = (article_id) => {
   const checkArticleExistsQuery = `SELECT article_id FROM articles WHERE article_id = $1;`;
   return db.query(checkArticleExistsQuery, [article_id]).then(({ rows }) => {
@@ -17,6 +16,7 @@ exports.checkArticleExists = (article_id) => {
   });
 };
 
+// FETCH MODELS
 exports.fetchAllArticles = () => {
   const allArticlesQuery = `SELECT a.article_id, a.title, a.topic, a.author, a.body, a.created_at, a.votes, a.article_img_url, COUNT(c.comment_id) as comment_count
   FROM articles AS a
@@ -30,8 +30,33 @@ exports.fetchAllArticles = () => {
   });
 };
 
-exports.fetchArticles = (topic) => {
-  if (!topic)
+exports.fetchArticles = (query) => {
+  const validQueries = ['author', 'topic', 'sort_by', 'order_by'];
+  const isValidQuery = Object.keys(query).some((key) =>
+    validQueries.includes(key)
+  );
+  if (!isValidQuery)
+    return Promise.reject({ status: 400, errorMessage: invalidInput });
+  const { topic, author, sort_by = 'created_at', order_by = 'desc' } = query;
+  const validSortBys = [
+    'title',
+    'topic',
+    'author',
+    'body',
+    'votes',
+    'created_at',
+    'comment_count',
+  ];
+  const validOrderBys = ['asc', 'desc'];
+  console.log(
+    author,
+    topic,
+    order_by,
+    validSortBys.includes(sort_by),
+    validOrderBys.includes(order_by)
+  );
+
+  if (!validSortBys.includes(sort_by))
     return Promise.reject({ status: 400, errorMessage: invalidInput });
 
   let filteredArticlesQuery = `SELECT a.article_id, a.title, a.topic, a.author, a.body, a.created_at, a.votes, a.article_img_url, COUNT(c.comment_id) as comment_count
@@ -42,16 +67,24 @@ exports.fetchArticles = (topic) => {
   const queryVals = [];
 
   if (topic) {
-    conditions.push(`topic = $${conditions.length + 1}`);
+    conditions.push(`a.topic = $${conditions.length + 1}`);
     queryVals.push(topic.toLowerCase());
+  }
+  if (author) {
+    conditions.push(`a.author = $${conditions.length + 1}`);
+    queryVals.push(author.toLowerCase());
   }
 
   if (conditions.length) {
-    filteredArticlesQuery += ' WHERE ' + conditions.join(' AND ');
+    filteredArticlesQuery += '\n WHERE ' + conditions.join(' AND ');
   }
 
   filteredArticlesQuery += ` GROUP BY a.article_id `;
-  filteredArticlesQuery += ` ORDER BY a.created_at desc;`;
+
+  if (validSortBys.includes(sort_by) && validOrderBys.includes(order_by)) {
+    filteredArticlesQuery += ` ORDER BY a.${sort_by} ${order_by};`;
+  }
+  console.log(filteredArticlesQuery);
   return db.query(filteredArticlesQuery, queryVals).then(({ rows }) => {
     if (!rows.length)
       return Promise.reject({ status: 404, errorMessage: recordsNotFound });
@@ -79,6 +112,7 @@ exports.fetchArticleComments = (articleID) => {
   return db.query(commentsOfArticleQuery, [articleID]).then(({ rows }) => rows);
 };
 
+// ADD MODELS
 exports.addNewComment = (articleID, { username, body }) => {
   const insertCommentQuery = `INSERT INTO comments
   (author, body, article_id)
@@ -90,6 +124,7 @@ exports.addNewComment = (articleID, { username, body }) => {
     .then(({ rows }) => rows[0]);
 };
 
+// UPDATE MODELS
 exports.updateArticle = (articleID, { inc_votes: votes }) => {
   const keyToUpdate = 'votes';
   const newValue = votes;
@@ -103,6 +138,7 @@ exports.updateArticle = (articleID, { inc_votes: votes }) => {
     .then(({ rows }) => rows[0]);
 };
 
+// DELETE MODELS
 exports.removeComment = (commentID) => {
   commentID;
   const removeCommentQuery = `DELETE FROM comments

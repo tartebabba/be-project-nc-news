@@ -11,7 +11,7 @@ const {
 } = require('../models/articles.models');
 
 exports.getArticles = (req, res, next) => {
-  const { topic } = req.query;
+  console.log(req.query);
   if (!Object.keys(req.query).length) {
     return fetchAllArticles()
       .then((articles) => {
@@ -19,9 +19,8 @@ exports.getArticles = (req, res, next) => {
       })
       .catch((err) => next(err));
   } else {
-    return fetchArticles(topic)
+    return fetchArticles(req.query)
       .then((articles) => {
-
         res.status(200).send({ articles });
       })
       .catch((err) => next(err));
