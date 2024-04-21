@@ -17,27 +17,44 @@ exports.checkArticleExists = (article_id) => {
 };
 
 // FETCH MODELS
-exports.fetchAllArticles = () => {
+exports.fetchAllArticles = (limit = 10, page = 1) => {
   const allArticlesQuery = `SELECT a.article_id, a.title, a.topic, a.author, a.body, a.created_at, a.votes, a.article_img_url, COUNT(c.comment_id) as comment_count
   FROM articles AS a
   LEFT JOIN comments AS c ON a.article_id = c.article_id
   GROUP BY a.article_id
-  ORDER BY a.created_at desc;`;
-  return db.query(allArticlesQuery).then(({ rows }) => {
-    if (!rows.length)
-      return Promise.reject({ status: 404, errorMessage: recordsNotFound });
-    else return rows;
-  });
+  ORDER BY a.created_at desc
+  LIMIT $1 OFFSET $2;`;
+  return db
+    .query(allArticlesQuery, [limit, limit * (page - 1)])
+    .then(({ rows, rowCount }) => {
+      if (!rows.length)
+        return Promise.reject({ status: 404, errorMessage: recordsNotFound });
+      else return { articles: rows, total_count: rowCount };
+    });
 };
 
 exports.fetchArticles = (query) => {
-  const validQueries = ['author', 'topic', 'sort_by', 'order_by'];
+  const validQueries = [
+    'author',
+    'topic',
+    'sort_by',
+    'order_by',
+    'page',
+    'limit',
+  ];
   const isValidQuery = Object.keys(query).some((key) =>
     validQueries.includes(key)
   );
   if (!isValidQuery)
     return Promise.reject({ status: 400, errorMessage: invalidInput });
-  const { topic, author, sort_by = 'created_at', order_by = 'desc' } = query;
+  const {
+    topic,
+    author,
+    sort_by = 'created_at',
+    order_by = 'desc',
+    limit = 10,
+    page = 1,
+  } = query;
   const validSortBys = [
     'title',
     'topic',
@@ -74,13 +91,16 @@ exports.fetchArticles = (query) => {
   filteredArticlesQuery += ` GROUP BY a.article_id `;
 
   if (validSortBys.includes(sort_by) && validOrderBys.includes(order_by)) {
-    filteredArticlesQuery += ` ORDER BY a.${sort_by} ${order_by};`;
+    filteredArticlesQuery += ` ORDER BY a.${sort_by} ${order_by}`;
   }
-  return db.query(filteredArticlesQuery, queryVals).then(({ rows }) => {
-    if (!rows.length)
-      return Promise.reject({ status: 404, errorMessage: recordsNotFound });
-    else return rows;
-  });
+  filteredArticlesQuery += ` LIMIT ${limit} OFFSET ${limit * (page - 1)};`;
+  return db
+    .query(filteredArticlesQuery, queryVals)
+    .then(({ rows, rowCount }) => {
+      if (!rows.length)
+        return Promise.reject({ status: 404, errorMessage: recordsNotFound });
+      else return { articles: rows, total_count: rowCount };
+    });
 };
 
 exports.fetchArticleByID = (articleID) => {
@@ -129,15 +149,32 @@ exports.updateArticle = (articleID, { inc_votes: votes }) => {
     .then(({ rows }) => rows[0]);
 };
 
-// DELETE MODELS
-exports.removeComment = (commentID) => {
-  commentID;
-  const removeCommentQuery = `DELETE FROM comments
-  WHERE comment_id = $1
+// POST MODELS
+exports.insertArticle = ({
+  author,
+  title,
+  body,
+  topic,
+  article_img_url = '',
+}) => {
+  const insertArticleQuery = `INSERT INTO articles
+    (author, title, body, topic, article_img_url, votes)
+  VALUES
+    ($1, $2, $3, $4, $5, $6)
   RETURNING *;`;
-  return db.query(removeCommentQuery, [commentID]).then(({ rows }) => {
-    if (!rows.length)
-      return Promise.reject({ status: 404, errorMessage: recordNotFound });
-    else rows[0];
-  });
+
+  return db
+    .query(insertArticleQuery, [author, title, body, topic, article_img_url, 0])
+    .then(({ rows }) => rows[0].article_id)
+    .then((articleID) => {
+      const articleByIdQuery = `SELECT a.article_id, a.title, a.topic, a.author, a.body, a.created_at, a.votes, a.article_img_url, COUNT(c.comment_id) AS comment_count 
+  FROM articles AS a
+  LEFT JOIN comments AS c ON a.article_id = c.article_id
+  WHERE a.article_id = $1
+  GROUP BY a.article_id;`;
+      return db
+        .query(articleByIdQuery, [articleID])
+        .then(({ rows }) => rows[0]);
+    });
 };
+

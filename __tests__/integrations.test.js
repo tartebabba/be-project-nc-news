@@ -105,7 +105,6 @@ describe('ARTICLES', () => {
           expect(articles).toBeSortedBy('created_at', {
             descending: isDescending,
           });
-          expect(articles.length).toBe(13);
           articles.forEach((articles) => {
             expect(Object.keys(articles)).toEqual(expectedKeys);
             expect(articles).toMatchObject(expectedArticle);
@@ -220,6 +219,216 @@ describe('ARTICLES', () => {
           .expect(400)
           .then(({ body: { errorMessage } }) => {
             expect(errorMessage).toBe(invalidInput);
+          });
+      });
+    });
+    describe('GET /api/articles?page&&limit', () => {
+      test('GET 200: Endpoint returns a default number of records for per page + able to specify page', () => {
+        const limit = 5;
+        const page = 2;
+        return request(app)
+          .get(`/api/articles?page=${page}&&limit=${limit}`)
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            const expectedArticleObject = {
+              article_id: expect.any(Number),
+              title: expect.any(String),
+              topic: expect.any(String),
+              author: expect.any(String),
+              body: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              article_img_url: expect.any(String),
+              comment_count: expect.any(String),
+            };
+            articles.forEach((article) => {
+              expect(article).toMatchObject(expectedArticleObject);
+            });
+            expect(articles.length).toBe(limit);
+          });
+      });
+      test('GET 200: Endpoint returns a default number of records and on page one with no page limit query', () => {
+        const limit = 10;
+        return request(app)
+          .get(`/api/articles?topic=mitch`)
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            const expectedArticleObject = {
+              article_id: expect.any(Number),
+              title: expect.any(String),
+              topic: expect.any(String),
+              author: expect.any(String),
+              body: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              article_img_url: expect.any(String),
+              comment_count: expect.any(String),
+            };
+            articles.forEach((article) => {
+              expect(article).toMatchObject(expectedArticleObject);
+            });
+            expect(articles.length).toBe(limit);
+          });
+      });
+      test('GET 200: Endpoint returns a default number of records and on page one with no page limit query', () => {
+        const limit = 10;
+        return request(app)
+          .get(`/api/articles`)
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            const expectedArticleObject = {
+              article_id: expect.any(Number),
+              title: expect.any(String),
+              topic: expect.any(String),
+              author: expect.any(String),
+              body: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              article_img_url: expect.any(String),
+              comment_count: expect.any(String),
+            };
+            articles.forEach((article) => {
+              expect(article).toMatchObject(expectedArticleObject);
+            });
+            expect(articles.length).toBe(limit);
+          });
+      });
+      test('GET 404: Endpoint returns a bad request error when given an non-valid page', () => {
+        const limit = 5;
+        const page = 37;
+        return request(app)
+          .get(`/api/articles?page=${page}&&limit=${limit}`)
+          .expect(404)
+          .then(({ body: { errorMessage } }) => {
+            expect(errorMessage).toEqual(recordsNotFound);
+          });
+      });
+      test('GET 404: Endpoint returns a records not found error when given a page exceeding the limit', () => {
+        const limit = 13;
+        const page = 2;
+        return request(app)
+          .get(`/api/articles?page=${page}&&limit=${limit}`)
+          .expect(404)
+          .then(({ body: { errorMessage } }) => {
+            expect(errorMessage).toEqual(recordsNotFound);
+          });
+      });
+      test('GET 400: Endpoint returns a records not found error when given a page exceeding the limit', () => {
+        const limit = 'string';
+        const page = 1;
+        return request(app)
+          .get(`/api/articles?page=${page}&&limit=${limit}`)
+          .expect(400)
+          .then(({ body: { errorMessage } }) => {
+            expect(errorMessage).toEqual(invalidInput);
+          });
+      });
+      test('GET 400: Endpoint returns a records not found error when given a page exceeding the limit', () => {
+        const limit = 10;
+        const page = 'string';
+        return request(app)
+          .get(`/api/articles?page=${page}&&limit=${limit}`)
+          .expect(400)
+          .then(({ body: { errorMessage } }) => {
+            expect(errorMessage).toEqual(invalidInput);
+          });
+      });
+      test('GET 200: Endpoint return articles up to the limit, even when given limit exceeding article count', () => {
+        const limit = 50;
+        const page = 1;
+        return request(app)
+          .get(`/api/articles?page=${page}&&limit=${limit}`)
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            const expectedArticleObject = {
+              article_id: expect.any(Number),
+              title: expect.any(String),
+              topic: expect.any(String),
+              author: expect.any(String),
+              body: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              article_img_url: expect.any(String),
+              comment_count: expect.any(String),
+            };
+            articles.forEach((article) => {
+              expect(article).toMatchObject(expectedArticleObject);
+            });
+            expect(articles.length).toBeLessThanOrEqual(limit);
+          });
+      });
+      test('GET 200: Endpoint return articles equal to the limit', () => {
+        const limit = 13;
+        const page = 1;
+        return request(app)
+          .get(`/api/articles?page=${page}&&limit=${limit}`)
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            const expectedArticleObject = {
+              article_id: expect.any(Number),
+              title: expect.any(String),
+              topic: expect.any(String),
+              author: expect.any(String),
+              body: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              article_img_url: expect.any(String),
+              comment_count: expect.any(String),
+            };
+            articles.forEach((article) => {
+              expect(article).toMatchObject(expectedArticleObject);
+            });
+            expect(articles.length).toBeLessThanOrEqual(limit);
+          });
+      });
+      test('GET 200: Endpoint return articles equal to the limit with count', () => {
+        const limit = 13;
+        const page = 1;
+        return request(app)
+          .get(`/api/articles?page=${page}&&limit=${limit}`)
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            const expectedArticleObject = {
+              article_id: expect.any(Number),
+              title: expect.any(String),
+              topic: expect.any(String),
+              author: expect.any(String),
+              body: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              article_img_url: expect.any(String),
+              comment_count: expect.any(String),
+            };
+            articles.forEach((article) => {
+              expect(article).toMatchObject(expectedArticleObject);
+            });
+            expect(articles.length).toBeLessThanOrEqual(limit);
+          });
+      });
+      test('GET 200: Endpoint return articles equal to the limit with count exceeding article count', () => {
+        const limit = 50;
+        const page = 1;
+        return request(app)
+          .get(`/api/articles?page=${page}&&limit=${limit}`)
+          .expect(200)
+          .then(({ body: { articles, total_count } }) => {
+            console.log(total_count, articles.length);
+            const expectedArticleObject = {
+              article_id: expect.any(Number),
+              title: expect.any(String),
+              topic: expect.any(String),
+              author: expect.any(String),
+              body: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              article_img_url: expect.any(String),
+              comment_count: expect.any(String),
+            };
+            articles.forEach((article) => {
+              expect(article).toMatchObject(expectedArticleObject);
+            });
+            expect(articles.length).toBeLessThanOrEqual(limit);
+            expect(total_count).toBe(13);
           });
       });
     });
@@ -340,6 +549,81 @@ describe('ARTICLES', () => {
         .then(({ body }) => {
           const expectedResponse = recordNotFound;
           expect(body.errorMessage).toBe(expectedResponse);
+        });
+    });
+  });
+  describe('POST /api/articles', () => {
+    test('POST 200: Endpoint adds a new article and returns the new article with additional properties', () => {
+      const newArticle = {
+        author: 'butter_bridge',
+        title: 'new article',
+        body: 'article body',
+        topic: 'mitch',
+        article_img_url: 'url example',
+      };
+      return request(app)
+        .post('/api/articles')
+        .send(newArticle)
+        .expect(200)
+        .then(({ body: { newArticle } }) => {
+          const expectedArticle = {
+            author: newArticle.author,
+            title: newArticle.title,
+            body: newArticle.body,
+            topic: newArticle.topic,
+            article_img_url: newArticle.article_img_url,
+            article_id: expect.any(Number),
+            votes: 0,
+            created_at: expect.any(String),
+            comment_count: 0,
+          };
+          expect(newArticle).toMatchObject(expectedArticle);
+        });
+    });
+    test('POST 400: Endpoint returns bad request when given posting an article by an invalid author', () => {
+      const newArticle = {
+        author: 'invalidUser',
+        title: 'new article',
+        body: 'article body',
+        topic: 'mitch',
+        article_img_url: 'url example',
+      };
+      return request(app)
+        .post('/api/articles')
+        .send(newArticle)
+        .expect(400)
+        .then(({ body: { errorMessage } }) => {
+          expect(errorMessage).toBe(badRequest);
+        });
+    });
+    test('POST 400: Endpoint returns bad request when given posting an article by an invalid topic', () => {
+      const newArticle = {
+        author: 'butter_bridge',
+        title: 'new article',
+        body: 'article body',
+        topic: 'invalidArticle',
+        article_img_url: 'url example',
+      };
+      return request(app)
+        .post('/api/articles')
+        .send(newArticle)
+        .expect(400)
+        .then(({ body: { errorMessage } }) => {
+          expect(errorMessage).toBe(badRequest);
+        });
+    });
+    test('POST 400: Endpoint returns bad request when given posting an article by an invalid topic', () => {
+      const newArticle = {
+        author: 'butter_bridge',
+        title: 'new article',
+        topic: 'mitch',
+      };
+      return request(app)
+        .post('/api/articles')
+        .send(newArticle)
+        .expect(400)
+        .then(({ body: { errorMessage } }) => {
+          expect(errorMessage).toBe(badRequest);
         });
     });
   });
@@ -499,6 +783,99 @@ describe('USERS', () => {
             expect(Object.keys(user).length).toBe(3);
             expect(user).toMatchObject(expectedObject);
           });
+        });
+    });
+  });
+  describe('USERS: /api/users/:username', () => {
+    test('GET 200: Endpoints returns the specified user', () => {
+      return request(app)
+        .get('/api/users/butter_bridge')
+        .expect(200)
+        .then(({ body: { user } }) => {
+          const expectedUser = {
+            username: 'butter_bridge',
+            name: 'jonny',
+            avatar_url:
+              'https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg',
+          };
+          expect(user).toMatchObject(expectedUser);
+        });
+    });
+    test('GET 404: Endpoint returns not found error when username is valid but non-existent', () => {
+      return request(app)
+        .get('/api/users/invalid_user')
+        .expect(404)
+        .then(({ body: { errorMessage } }) => {
+          expect(errorMessage).toBe(recordNotFound);
+        });
+    });
+    test.todo(
+      'GET 400: Endpoint returns bad request error when given a username with invalid characters'
+    );
+  });
+});
+
+// COMMENTS
+describe('COMMENTS', () => {
+  describe('PATCH: /api/comments/:comment_id', () => {
+    test('PATCH 200: Endpoint returns updated comment with votes field updated', () => {
+      const newVote = 1;
+      const update = {
+        inc_votes: newVote,
+      };
+      return request(app)
+        .patch('/api/comments/1')
+        .send(update)
+        .expect(200)
+        .then(({ body: { updatedComment } }) => {
+          expectedComment = {
+            comment_id: 1,
+            body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+            article_id: 9,
+            author: 'butter_bridge',
+            votes: 16 + newVote,
+            created_at: '2020-04-06T12:17:00.000Z',
+          };
+          expect(updatedComment).toMatchObject(expectedComment);
+        });
+    });
+    test('PATCH 400: Endpoint returns invalid input error when given invalid update data type', () => {
+      const newVote = 'invalid data';
+      const update = {
+        inc_votes: newVote,
+      };
+      return request(app)
+        .patch('/api/comments/1')
+        .send(update)
+        .expect(400)
+        .then(({ body: { errorMessage } }) => {
+          expect(errorMessage).toBe(invalidInput);
+        });
+    });
+    test('PATCH 404: Endpoints returns record not found error when given valid but non-existent ID', () => {
+      const newVote = 3;
+      const update = {
+        inc_votes: newVote,
+      };
+      return request(app)
+        .patch('/api/comments/4563')
+        .send(update)
+        .expect(404)
+        .then(({ body: { errorMessage } }) => {
+          expect(errorMessage).toBe(recordNotFound);
+        });
+    });
+    test('PATCH 400: Endpoints return bad request when given an invalid comment_id url', () => {
+      const newVote = 3;
+      const update = {
+        inc_votes: newVote,
+      };
+      return request(app)
+        .patch('/api/comments/invalidID')
+        .send(update)
+        .expect(400)
+        .then(({ body: { errorMessage } }) => {
+          expect(errorMessage).toBe(invalidInput);
         });
     });
   });

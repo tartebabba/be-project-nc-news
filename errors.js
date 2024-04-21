@@ -1,3 +1,9 @@
+// Error Messages
+exports.recordNotFound =
+  "Sorry! We weren't able to find what you were looking for.";
+exports.recordsNotFound = "Uh oh! Looks like there's nothing to see here..";
+exports.invalidInput = 'Invalid input: incorrect data format.';
+
 // Error Handlers
 
 exports.sendGeneric404Error = (req, res) => {
@@ -9,7 +15,7 @@ exports.sendGeneric404Error = (req, res) => {
 };
 
 exports.sendErrorHandled = (err, req, res, next) => {
-  // console.log(err.code, 'errorBeingHandled'); // ! Keeping this to manage debug errors.
+  console.log(err.code, 'errorBeingHandled'); // ! Keeping this to manage debug errors.
   // ERROR MESSAGES
   const badRequest = 'Bad request';
   const invalidInput = 'Invalid input: incorrect data format.';
@@ -30,8 +36,16 @@ exports.sendErrorHandled = (err, req, res, next) => {
       res.status(400).send({ errorMessage: invalidInput });
     }
     if (err.code === '42702') {
-      // ! Abiguous Column
+      // ! Ambiguous Column
       res.status(400).send({ errorMessage: badRequest });
+    }
+    if (err.code === '42703') {
+      // ! Undefined Column
+      res.status(400).send({ errorMessage: invalidInput });
+    }
+    if (err.code === '42601') {
+      // ! Syntax error - incorrect SQL statement
+      res.status(400).send({ errorMessage: invalidInput });
     }
   }
   return next(err);

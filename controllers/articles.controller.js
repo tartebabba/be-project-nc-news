@@ -6,21 +6,23 @@ const {
   checkUserExists,
   addNewComment,
   updateArticle,
-  removeComment,
   fetchArticles,
+  insertArticle,
 } = require('../models/articles.models');
 
 exports.getArticles = (req, res, next) => {
   if (!Object.keys(req.query).length) {
     return fetchAllArticles()
-      .then((articles) => {
-        res.status(200).send({ articles });
+      .then((articlesObject) => {
+        const { articles, total_count } = articlesObject;
+        res.status(200).send({ articles, total_count });
       })
       .catch((err) => next(err));
   } else {
     return fetchArticles(req.query)
-      .then((articles) => {
-        res.status(200).send({ articles });
+      .then((articlesObject) => {
+        const { articles, total_count } = articlesObject;
+        res.status(200).send({ articles, total_count });
       })
       .catch((err) => next(err));
   }
@@ -71,13 +73,12 @@ exports.patchArticleByID = (req, res, next) => {
     .catch((err) => next(err));
 };
 
-exports.deleteCommentByID = (req, res, next) => {
-  const { comment_id } = req.params;
-  return removeComment(comment_id)
-    .then((deletedComment) => {
-      deletedComment;
-      res.status(204).send();
+exports.postArticle = (req, res, next) => {
+  const { body } = req;
+  return insertArticle(body)
+    .then((newArticle) => {
+      newArticle.comment_count = parseInt(newArticle.comment_count);
+      res.status(200).send({ newArticle });
     })
     .catch((err) => next(err));
 };
-
