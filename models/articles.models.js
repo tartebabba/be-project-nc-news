@@ -116,11 +116,16 @@ exports.fetchArticleByID = (articleID) => {
   });
 };
 
-exports.fetchArticleComments = (articleID) => {
+exports.fetchArticleComments = (articleID, { page = 1, limit = 5 }) => {
   const commentsOfArticleQuery = `SELECT comment_id, votes, created_at, author, body, article_id FROM comments
   WHERE article_id = $1
-  ORDER BY created_at desc`;
-  return db.query(commentsOfArticleQuery, [articleID]).then(({ rows }) => rows);
+  ORDER BY created_at desc
+  LIMIT $2 OFFSET $3;`;
+  return db
+    .query(commentsOfArticleQuery, [articleID, limit, limit * (page - 1)])
+    .then(({ rows, rowCount }) => {
+      return { comments: rows, total_count: rowCount };
+    });
 };
 
 // ADD MODELS

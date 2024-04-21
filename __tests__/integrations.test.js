@@ -412,7 +412,6 @@ describe('ARTICLES', () => {
           .get(`/api/articles?page=${page}&&limit=${limit}`)
           .expect(200)
           .then(({ body: { articles, total_count } }) => {
-            console.log(total_count, articles.length);
             const expectedArticleObject = {
               article_id: expect.any(Number),
               title: expect.any(String),
@@ -550,6 +549,156 @@ describe('ARTICLES', () => {
           const expectedResponse = recordNotFound;
           expect(body.errorMessage).toBe(expectedResponse);
         });
+    });
+    describe('GET /api/articles/:article_id/comments?page&&limit', () => {
+      test('GET 200: Endpoint returns a default number of records for per page + able to specify page', () => {
+        const limit = 3;
+        const page = 1;
+        return request(app)
+          .get(`/api/articles/1/comments?page=${page}&&limit=${limit}`)
+          .expect(200)
+          .then(({ body: { comments, total_count } }) => {
+            const article_id = 1;
+            const expectedComment = {
+              comment_id: expect.any(Number),
+              article_id: expect.any(Number),
+              author: expect.any(String),
+              body: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+            };
+            comments.forEach((comment) => {
+              expect(comment.article_id).toBe(article_id);
+              expect(comment).toMatchObject(expectedComment);
+            });
+            expect(total_count).toBe(limit);
+          });
+      });
+      test('GET 200: Endpoint returns a default number of records and on page one with no page limit query', () => {
+        const limit = 5;
+        return request(app)
+          .get(`/api/articles/1/comments`)
+          .expect(200)
+          .then(({ body: { comments, total_count } }) => {
+            const article_id = 1;
+            const expectedComment = {
+              comment_id: expect.any(Number),
+              article_id: expect.any(Number),
+              author: expect.any(String),
+              body: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+            };
+            comments.forEach((comment) => {
+              expect(comment.article_id).toBe(article_id);
+              expect(comment).toMatchObject(expectedComment);
+            });
+            expect(total_count).toBe(limit);
+          });
+      });
+      test('GET 200: Endpoint returns a default number of comments and on page one with no page limit query', () => {
+        const limit = 5;
+        return request(app)
+          .get(`/api/articles/1/comments`)
+          .expect(200)
+          .then(({ body: { comments, total_count } }) => {
+            const article_id = 1;
+            const expectedComment = {
+              comment_id: expect.any(Number),
+              article_id: expect.any(Number),
+              author: expect.any(String),
+              body: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+            };
+            comments.forEach((comment) => {
+              expect(comment.article_id).toBe(article_id);
+              expect(comment).toMatchObject(expectedComment);
+            });
+            expect(total_count).toBe(limit);
+          });
+      });
+      test('GET 200: Endpoint returns an empty array when given an non-valid page', () => {
+        const limit = 5;
+        const page = 370;
+        return request(app)
+          .get(`/api/articles/1/comments?page=${page}&&limit=${limit}`)
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments).toEqual([]);
+          });
+      });
+      test('GET 200: Endpoint returns a records not found error when given a page exceeding the limit', () => {
+        const limit = 50;
+        const page = 2;
+        return request(app)
+          .get(`/api/articles/1/comments?page=${page}&&limit=${limit}`)
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments).toEqual([]);
+          });
+      });
+      test('GET 400: Endpoint returns a invalid error when given an invalid arguement', () => {
+        const limit = 'string';
+        const page = 1;
+        return request(app)
+          .get(`/api/articles/1/comments?page=${page}&&limit=${limit}`)
+          .expect(400)
+          .then(({ body: { errorMessage } }) => {
+            expect(errorMessage).toEqual(invalidInput);
+          });
+      });
+      test('GET 400: Endpoint returns a records not found error when given a page exceeding the limit', () => {
+        const limit = 10;
+        const page = 'string';
+        return request(app)
+          .get(`/api/articles/1/comments?page=${page}&&limit=${limit}`)
+          .expect(400)
+          .then(({ body: { errorMessage } }) => {
+            expect(errorMessage).toEqual(invalidInput);
+          });
+      });
+      test('GET 200: Endpoint return articles up to the limit, even when given limit exceeding article count', () => {
+        const limit = 500;
+        const page = 1;
+        return request(app)
+          .get(`/api/articles/1/comments?page=${page}&&limit=${limit}`)
+          .expect(200)
+          .then(({ body: { comments, total_count } }) => {
+            expect(total_count).toBeLessThanOrEqual(limit);
+            expect(comments.length).toBeLessThanOrEqual(limit);
+          });
+      });
+      test('GET 200: Endpoint return articles equal to the limit', () => {
+        const limit = 11;
+        const page = 1;
+        return request(app)
+          .get(`/api/articles/1/comments?page=${page}&&limit=${limit}`)
+          .expect(200)
+          .then(({ body: { comments, total_count } }) => {
+            expect(comments.length).toBe(limit);
+          });
+      });
+      test('GET 200: Endpoint return articles equal to the limit with count', () => {
+        const limit = 11;
+        const page = 1;
+        return request(app)
+          .get(`/api/articles/1/comments?page=${page}&&limit=${limit}`)
+          .expect(200)
+          .then(({ body: { comments, total_count } }) => {
+            expect(total_count).toBe(limit);
+          });
+      });
+      test('GET 200: Endpoint return articles equal to the limit with count exceeding article count', () => {
+        const limit = 50;
+        const page = 1;
+        return request(app)
+          .get(`/api/articles?page=${page}&&limit=${limit}`)
+          .expect(200)
+          .then(({ body: { comments, total_count } }) => {
+            expect(total_count).toBeLessThanOrEqual(limit);
+          });
+      });
     });
   });
   describe('POST /api/articles', () => {

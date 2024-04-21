@@ -1,3 +1,4 @@
+const { totalCount } = require('../db/connection');
 const {
   fetchArticleByID,
   fetchAllArticles,
@@ -41,11 +42,12 @@ exports.getArticleByID = (req, res, next) => {
 exports.getArticleComments = (req, res, next) => {
   const { article_id } = req.params;
   return Promise.all([
-    fetchArticleComments(article_id),
+    fetchArticleComments(article_id, req.query),
     checkArticleExists(article_id),
   ])
-    .then(([comments]) => {
-      res.status(200).send({ comments });
+    .then(([commentsObject]) => {
+      const { comments, total_count } = commentsObject;
+      res.status(200).send({ comments, total_count });
     })
     .catch((err) => next(err));
 };
