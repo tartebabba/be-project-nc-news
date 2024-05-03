@@ -20,7 +20,6 @@ exports.patchCommentByID = (req, res, next) => {
     checkCommentExists(comment_id),
   ])
     .then(([updatedComment]) => {
-      console.log(updateComment);
       res.status(200).send({ updatedComment });
     })
     .catch((err) => next(err));
