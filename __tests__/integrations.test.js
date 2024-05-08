@@ -211,6 +211,30 @@ describe('ARTICLES', () => {
             });
           });
       });
+      test('GET 200: Endpoint returns all articles sorted by comment_count with default DESC order', () => {
+        const sortColumn = 'comment_count';
+        return request(app)
+          .get(`/api/articles?sort_by=${sortColumn}`)
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toBeSortedBy(sortColumn, {
+              descending: true,
+              coerce: true,
+            });
+          });
+      });
+      test('GET 200: Endpoint returns all articles sorted by comment_count with ASC order', () => {
+        const sortColumn = 'comment_count';
+        return request(app)
+          .get(`/api/articles?sort_by=${sortColumn}&order_by=asc`)
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toBeSortedBy(sortColumn, {
+              descending: false,
+              coerce: true,
+            });
+          });
+      });
       test('GET 400: Endpoint returns an bad request error when one query of N query is invalid', () => {
         const sortColumn = 'invalidColumn';
         const orderBy = 'desc';

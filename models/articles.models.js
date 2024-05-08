@@ -91,9 +91,10 @@ exports.fetchArticles = (query) => {
   filteredArticlesQuery += ` GROUP BY a.article_id `;
 
   if (validSortBys.includes(sort_by) && validOrderBys.includes(order_by)) {
-    filteredArticlesQuery += ` ORDER BY a.${sort_by} ${order_by}`;
+    filteredArticlesQuery += ` ORDER BY ${sort_by === 'comment_count' ? '' : 'a.'}${sort_by} ${order_by}`;
   }
   filteredArticlesQuery += ` LIMIT ${limit} OFFSET ${limit * (page - 1)};`;
+
   return db
     .query(filteredArticlesQuery, queryVals)
     .then(({ rows, rowCount }) => {
